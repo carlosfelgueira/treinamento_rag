@@ -69,7 +69,7 @@ def main_indexing():
     arquivos = lista_arquivos(DOCS_PATH)
 
     total_chunks = 0
-    text_splitter = TokenTextSplitter(chunk_size=500, chunk_overlap=50)
+    text_splitter = TokenTextSplitter(chunk_size=250, chunk_overlap=50)
 
     for arquivo in arquivos:
         try:

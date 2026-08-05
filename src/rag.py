@@ -132,7 +132,10 @@ def ask(query, k=K, history=None):
             "documento (entre colchetes, por exemplo [0],[1]) do documento que foi usado "
             "para responder. Use quantas citações e documentos forem necessários para "
             "responder à pergunta. Se a informação não estiver no contexto, diga "
-            "claramente que não possui essa informação na base de dados."
+            "claramente que não possui essa informação na base de dados. Atenção: em "
+            "códigos tributários, os artigos de um mesmo tributo podem estar em seções "
+            "diferentes do documento; ao informar alíquotas, considere todos os trechos "
+            "do contexto que tratem de base de cálculo e alíquotas."
         ),
     }
 
