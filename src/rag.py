@@ -21,11 +21,31 @@ COLLECTION_NAME = "treinamento_rag"
 EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
 K = 10
 
-ABBREVIATIONS = {
-    "iss": "ISS",
-    "iptu": "IPTU",
-    "itbi": "ITBI",
-    "ufir": "UFIR",
+SYNONYMS = {
+    "iptu": "IPTU Imposto Predial e Territorial Urbano",
+    "imposto predial e territorial urbano": "IPTU Imposto Predial e Territorial Urbano",
+    "imposto predial": "Imposto Predial IPTU",
+    "imposto territorial urbano": "Imposto Territorial Urbano IPTU",
+    "imposto imobiliário": "Imposto Imobiliário IPTU",
+    "iss": "ISS Imposto Sobre Serviços",
+    "imposto sobre serviços": "ISS Imposto Sobre Serviços",
+    "imposto sobre servico": "ISS Imposto Sobre Serviços",
+    "itbi": "ITBI Imposto sobre Transmissão de Bens Imóveis",
+    "imposto sobre transmissão": "ITBI Imposto sobre Transmissão de Bens Imóveis",
+    "transmissão de bens imóveis": "ITBI Transmissão de Bens Imóveis",
+    "ufir": "UFIR Unidade Fiscal de Referência",
+    "unidade fiscal de referência": "UFIR",
+    "ccm": "CCM Cadastro de Contribuintes Mobiliários",
+    "cadastro imobiliário": "Cadastro Imobiliário IPTU",
+    "taxa de fiscalização": "Taxa de Fiscalização de Localização, Instalação e Funcionamento",
+    "divida ativa": "Dívida Ativa Cobrança",
+    "dívida ativa": "Dívida Ativa Cobrança",
+    "divida": "Dívida",
+    "aliquota": "alíquota",
+    "construcao": "construção",
+    "taxas imobiliarias": "Taxas Imobiliárias IPTU",
+    "taxas imobiliárias": "Taxas Imobiliárias IPTU",
+    "imobiliarias": "imobiliárias",
 }
 
 _index_lock = threading.Lock()
@@ -33,8 +53,16 @@ _index_tried = False
 
 def normalize_query(query):
     normalized = query
-    for abbr, upper in ABBREVIATIONS.items():
-        normalized = re.sub(rf"\b{abbr}\b", upper, normalized, flags=re.IGNORECASE)
+    placeholders = []
+    for term in sorted(SYNONYMS, key=len, reverse=True):
+        pattern = rf"\b{re.escape(term)}\b"
+        marker = f"@@{len(placeholders)}@@"
+        updated, n = re.subn(pattern, marker, normalized, flags=re.IGNORECASE)
+        if n:
+            normalized = updated
+            placeholders.append(SYNONYMS[term])
+    for i, value in enumerate(placeholders):
+        normalized = normalized.replace(f"@@{i}@@", value)
     return normalized
 
 @functools.lru_cache(maxsize=1)
