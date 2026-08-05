@@ -19,7 +19,7 @@ load_dotenv()
 DB_PATH = "./chroma_db"
 COLLECTION_NAME = "treinamento_rag"
 EMBEDDING_MODEL = "paraphrase-multilingual-MiniLM-L12-v2"
-K = 10
+K = 15
 
 SYNONYMS = {
     "iptu": "IPTU Imposto Predial e Territorial Urbano",
@@ -46,6 +46,10 @@ SYNONYMS = {
     "taxas imobiliarias": "Taxas Imobiliárias IPTU",
     "taxas imobiliárias": "Taxas Imobiliárias IPTU",
     "imobiliarias": "imobiliárias",
+    "taxa de coleta": "Taxa de Coleta e Destinação Final do Lixo",
+    "taxa de coleta de lixo": "Taxa de Coleta e Destinação Final do Lixo",
+    "coleta de lixo": "coleta e destinação final do lixo",
+    "taxa de lixo": "Taxa de Coleta e Destinação Final do Lixo",
 }
 
 _index_lock = threading.Lock()
