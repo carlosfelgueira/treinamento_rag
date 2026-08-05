@@ -1,5 +1,14 @@
 import os
 import re
+import threading
+import functools
+
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+
+import torch
+torch.set_num_threads(1)
+
 from dotenv import load_dotenv
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
@@ -19,12 +28,16 @@ ABBREVIATIONS = {
     "ufir": "UFIR",
 }
 
+_index_lock = threading.Lock()
+_index_tried = False
+
 def normalize_query(query):
     normalized = query
     for abbr, upper in ABBREVIATIONS.items():
         normalized = re.sub(rf"\b{abbr}\b", upper, normalized, flags=re.IGNORECASE)
     return normalized
 
+@functools.lru_cache(maxsize=1)
 def get_embeddings():
     return HuggingFaceEmbeddings(
         model_name=EMBEDDING_MODEL,
@@ -40,16 +53,25 @@ def get_vectorstore():
     )
 
 def ensure_indexed():
-    from src import ingest
-    try:
-        count = get_vectorstore()._collection.count()
-        if count == 0:
-            raise ValueError("Base vetorial vazia.")
-    except Exception:
-        print("Base vetorial ausente ou vazia. Indexando documentos...")
-        ingest.main_indexing()
+    global _index_tried
+    if _index_tried:
+        return
+    with _index_lock:
+        if _index_tried:
+            return
+        try:
+            count = get_vectorstore()._collection.count()
+            if count == 0:
+                raise ValueError("Base vetorial vazia.")
+        except Exception:
+            print("Base vetorial ausente ou vazia. Indexando documentos...")
+            from src import ingest
+            ingest.main_indexing()
+        finally:
+            _index_tried = True
 
 def ask(query, k=K):
+    ensure_indexed()
     vectorstore = get_vectorstore()
     search_result = vectorstore.similarity_search(query=normalize_query(query), k=k)
 

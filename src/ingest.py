@@ -2,6 +2,12 @@ import os
 from os import listdir
 from os.path import isfile, join, isdir
 
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+
+import torch
+torch.set_num_threads(1)
+
 import chromadb
 import docx
 from pptx import Presentation
@@ -60,12 +66,12 @@ def main_indexing():
     )
 
     print(f"\n📂 Indexando os documentos de {DOCS_PATH}...\n")
-    lista_arquivos = lista_arquivos(DOCS_PATH)
+    arquivos = lista_arquivos(DOCS_PATH)
 
     total_chunks = 0
     text_splitter = TokenTextSplitter(chunk_size=500, chunk_overlap=50)
 
-    for arquivo in lista_arquivos:
+    for arquivo in arquivos:
         try:
             arquivo_content = ""
 
