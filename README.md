@@ -92,36 +92,3 @@ docs/  -->  src/ingest.py  -->  ChromaDB (chunks + embeddings)
 
 Resposta obtida a partir dos documentos:
 > O documento estabelece alíquotas mínima e máxima do ISS de **2% e 5%** (art. 88), com redução para **3%** no subitem 8.01 da Lista de Serviços (exercício de 2018) [0] e isenções para subitens específicos [1].
-
-## Notas de segurança
-
-- O `.env` contém a chave da API e está no `.gitignore` — **nunca** commite-o.
-- Use um `requirements.txt` com as versões exatas que funcionam no seu ambiente.
-
-## Deploy público (Streamlit Cloud / HuggingFace Spaces)
-
-A chave da API deve ser configurada como *secret* da plataforma, nunca no código.
-
-### HuggingFace Spaces
-
-1. Crie um Space (SDK: **Docker** ou **Gradio/Streamlit**, conforme preferir) apontando para este repositório.
-2. Em **Settings → Variables and secrets**, adicione:
-   | Nome | Valor |
-   |---|---|
-   | `OPENAI_API_BASE` | `https://api.deepseek.com/v1` |
-   | `OPENAI_API_KEY` | sua chave |
-   | `MODEL_NAME` | `deepseek-v4-flash` |
-3. Essas variáveis ficam disponíveis como variáveis de ambiente (`os.getenv`) — que é como o `src/rag.py` lê a configuração.
-
-### Streamlit Community Cloud
-
-1. Faça o deploy do repositório em **Streamlit Cloud** (o app é `src/web_app.py`).
-2. Em **Advanced settings → Secrets**, cole um bloco TOML:
-   ```toml
-   OPENAI_API_BASE = "https://api.deepseek.com/v1"
-   OPENAI_API_KEY = "sua-chave-aqui"
-   MODEL_NAME = "deepseek-v4-flash"
-   ```
-3. Os secrets são injetados na aplicação (via `st.secrets` e como variáveis de ambiente), seguindo as mesmas variáveis que o código lê.
-
-> ℹ️ **Sobre a base vetorial:** o `chroma_db/` não é versionado. No primeiro acesso, o app detecta que a base está vazia e **indexa automaticamente** os documentos de `docs/` (`src/rag.ensure_indexed`). Por isso, inclua os documentos-fonte em `docs/` no repositório. No Streamlit Cloud, o app é `src/web_app.py` (não depende de API local).
