@@ -98,7 +98,7 @@ def ensure_indexed():
         finally:
             _index_tried = True
 
-def ask(query, k=K):
+def ask(query, k=K, history=None):
     ensure_indexed()
     vectorstore = get_vectorstore()
     search_result = vectorstore.similarity_search(query=normalize_query(query), k=k)
@@ -132,10 +132,15 @@ def ask(query, k=K):
         ),
     }
 
-    messages = [
-        rolemsg,
-        {"role": "user", "content": f"Documents:\n{context}\n\nQuestion: {query}"},
-    ]
+    messages = [rolemsg]
+    for turn in (history or []):
+        role = turn.get("role")
+        content = turn.get("content")
+        if role in ("user", "assistant") and content:
+            messages.append({"role": role, "content": content})
+    messages.append(
+        {"role": "user", "content": f"Documents:\n{context}\n\nQuestion: {query}"}
+    )
 
     resposta = llm.invoke(messages)
     return {"context": list_res, "answer": resposta.content}

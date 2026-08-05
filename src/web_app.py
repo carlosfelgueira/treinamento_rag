@@ -24,12 +24,23 @@ except Exception as e:
     st.error(f"Erro ao preparar a base de dados: {e}")
     st.stop()
 
-question = st.text_input("Digite Uma Pergunta Para a IA Executar Consulta nos Documentos:", "")
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-if st.button("Enviar"):
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
 
-    st.write("A pergunta foi: \"" + question + "\"")
+if prompt := st.chat_input("Digite uma pergunta sobre os documentos..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
     with st.spinner("Consultando os documentos..."):
-        result = ask(question)
-        st.markdown(result["answer"])
+        history = st.session_state.messages[:-1]
+        result = ask(prompt, history=history)
+        answer = result["answer"]
+
+    st.session_state.messages.append({"role": "assistant", "content": answer})
+    with st.chat_message("assistant"):
+        st.markdown(answer)
