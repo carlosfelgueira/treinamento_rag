@@ -17,6 +17,7 @@ for key, value in st.secrets.items():
 st.set_page_config(page_title="TREINAMENTO RAG", page_icon=":100:", layout="centered")
 
 st.title("_:green[TREINAMENTO RAG]_")
+st.caption("Tire suas dúvidas sobre o código tributário do município de São Sebastião.")
 
 try:
     ensure_indexed()
